@@ -1,0 +1,45 @@
+{
+  "name": "grunt-tail-wait",
+  "description": "Allows grunt to tail a file and wait for a speciic line",
+  "version": "0.1.0",
+  "homepage": "http://www.jasonds.co.uk/blog/grunt-tail-wait",
+  "author": {
+    "name": "Jason Dryhurst-Smith",
+    "email": "jason@jasonds.co.uk",
+    "url": "www.jasonds.co.uk"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://tigerswithguitars/grunt-tail-wait"
+  },
+  "bugs": {
+    "url": ""
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.jasonds.co.uk/blog/grunt-tail-wait/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.9.2",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt-contrib-nodeunit": "^0.3.3",
+    "grunt": "~0.4.5"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.5"
+  },
+  "keywords": [
+    "gruntplugin"
+  ],
+  "dependencies": {
+    "tail": "^0.4.0"
+  }
+}
