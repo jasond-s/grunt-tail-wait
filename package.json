@@ -1,7 +1,7 @@
 {
   "name": "grunt-tail-wait",
   "description": "Allows grunt to tail a file and wait for a specific keyword or phrase to appear.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "http://www.jasonds.co.uk/blog/grunt-tail-wait",
   "author": {
     "name": "Jason Dryhurst-Smith",

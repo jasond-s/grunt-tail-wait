@@ -30,7 +30,7 @@ exports.tail_wait = {
   default_options: function(test) {
     test.expect(1);
 
-    test.equal(1, 1, 'should describe what the default behavior is.');
+    test.equal(1, 1, 'default behaviour reads the file and .');
 
     test.done();
   },

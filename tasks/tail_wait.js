@@ -30,14 +30,10 @@ module.exports = function (grunt) {
 
       // Not required props, have defaults.
       lineSeparator: this.data.lineSeparator || "\n",
-      timeout: this.data.timeout || 30000
+      timeout: this.data.timeout || 30000,
+      fromBeginning: this.data.fromBeginning || false
 
     };
-
-    // Create the tail for our input file.
-    var fromBeginning = true;
-    var watchOptions = {};
-    var tail = new Tail(options.fileName, options.lineSeparator, watchOptions, fromBeginning);
 
     // The regular expression we want to check for.
     var regex = new RegExp(options.regex, 'g');
@@ -47,20 +43,25 @@ module.exports = function (grunt) {
 
     // THe timer used to cancel and move on if tail fails.
     var timer = null;
+    var interval = null;
 
     // Complete function ends grunt task and cleans up the tail.
     function complete (isSuccess) {
 
-        // Stop the timer now we are complete.
-        if (timer) {
-          clearTimeout(timer);
-        }
+      // Stop the timer now we are complete.
+      if (timer) {
+        clearTimeout(timer);
+      }
 
-        // Stop watching the file.
-        tail.unwatch();
+      if (interval) {
+        clearTimeout(interval);
+      }
 
-        // Tell grunt that we have finished doing what we need to do.
-        done(isSuccess);
+      // Stop watching the file.
+      tail.unwatch();
+
+      // Tell grunt that we have finished doing what we need to do.
+      done(isSuccess);
 
     }
 
@@ -71,6 +72,19 @@ module.exports = function (grunt) {
       complete(false);
 
     }, timeout);
+
+    // Ensure the file exists or timeout reached before we continue.
+    var found = false;
+
+    while (!found) {
+      found = fs.existsSync(options.fileName);
+    }
+
+    grunt.log.writeln('Tail: File found, begin tail.');
+
+    // Create the tail for our input file.
+    var watchOptions = {};
+    var tail = new Tail(options.fileName, options.lineSeparator, watchOptions, options.fromBeginning);
 
     // Check the contents of each line tailed.
     tail.on("line", function (data) {
@@ -84,6 +98,12 @@ module.exports = function (grunt) {
       }
 
     });
+
+    // Force the file to flush if it isn't.
+    interval = setInterval(function () {
+      var fd = fs.openSync(options.fileName, 'r');
+      fs.closeSync(fd);
+    }, 500);
 
     // TODO: Triggers the watch so the read for the tail starts at the start of an exisiting file. Not great.
     fs.appendFileSync(options.fileName, ' ');
