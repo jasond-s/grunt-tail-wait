@@ -33,7 +33,7 @@ grunt.initConfig({
     lineSeparator // defaults to '\n'
   },
 });
-``
+```
 
 ### Usage Examples
 
