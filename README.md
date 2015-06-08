@@ -25,15 +25,24 @@ In your project's Gruntfile, add a section named `tail_wait` to the data object 
 ```js
 grunt.initConfig({
   tail_wait: {
+    namedOptions: {
+      fileName: 'path/to/your/file.log',  // Required, this is the file to tail.
+      regex: 'keyword',                   // Required, this is keyword/phrase you are waiting for.
 
-    fileName: 'path/to/your/file.log',  // Required, this is the file to tail.
-    regex: 'keyword',                   // Required, this is keyword/phrase you are waiting for.
+      timeout: 1              // defaults to 30 seconds,
+      lineSeparator: 'string' // defaults to '\n',
 
-    timeout: 1    // defaults to 30 seconds,
-    lineSeparator // defaults to '\n'
+      fromBeginning: false,           // defaults to false.
+      forceWatchFromBeginning: false, // defaults to false.
+    }
   },
 });
 ```
+
+
+1. `fromBeginning` - Specified whether from the first file change detected by the watcher you would like to read the file fro mthe beginning.
+2. `forceWatchFromBeginning` - Forces a file change by writting a Unicode U+0020 to the end of the file. This may be useful if the file you wish to watch may have already been finished writting to. Obviously, be aware this is, although minimally, changing the file.
+
 
 ### Usage Examples
 
@@ -46,15 +55,17 @@ Once this phrase has been found then grunt will continue to the next task.
 ```js
 grunt.initConfig({
   tail_wait: {
+    dev: {
+      fileName: path.join(__dirname, 'dist/message.log'), // Watch a messages log file
+      regex: 'init complete',                             // Wait for the initialisation to complete.
 
-    fileName: path.join('dist/message.log'), // Watch a messages log file
-    regex: 'init complete',                  // Wait for the initialisation to complete.
-
-    timeout: 10000 ,      // Wait for 10secs, set in m.,
-    lineSeparator: "\r\n" // Use exotic line endings for the tail.
+      timeout: 10000 ,      // Wait for 10secs, set in ms.
+      lineSeparator: "\r\n" // Use some exotic line endings for the tail.
+    }
   },
 });
 ```
+
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).

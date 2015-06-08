@@ -35,12 +35,16 @@ module.exports = function(grunt) {
       default_options: {
         timeout: 10000,
         fileName: path.join(__dirname + '/package.json'),
-        regex: 'Dependencies'
+        regex: 'Dependencies',
+        forceWatchFromBeginning: true,
+        fromBeginning: true
       },
       custom_options: {
         timeout: 10000,
         fileName: path.join(__dirname + '/package.json'),
-        regex: 'Dependencies'
+        regex: 'Dependencies',
+        forceWatchFromBeginning: true,
+        fromBeginning: true
       }
     },
 

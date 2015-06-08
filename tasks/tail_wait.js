@@ -31,7 +31,11 @@ module.exports = function (grunt) {
       // Not required props, have defaults.
       lineSeparator: this.data.lineSeparator || "\n",
       timeout: this.data.timeout || 30000,
-      fromBeginning: this.data.fromBeginning || false
+      fromBeginning: this.data.fromBeginning || false,
+
+      // This is only needed if the file watched has been
+      // completed before the start of this task.
+      forceWatchFromBeginning: this.data.forceWatchFromBeginning || false
 
     };
 
@@ -41,14 +45,18 @@ module.exports = function (grunt) {
     // The length of time we will wait for our result.
     var timeout = options.timeout;
 
-    // THe timer used to cancel and move on if tail fails.
+    // The timer used to cancel and move on if tail fails.
     var timer = null;
+
+    // An interval to read the file, forcing as OS flush.
+    // Some loggers using a file streamers prevent the flush
+    // that would trigger the file watch used by node-tail.
     var interval = null;
 
     // Complete function ends grunt task and cleans up the tail.
     function complete (isSuccess) {
 
-      // Stop the timer now we are complete.
+      // Stop the timers now we are complete.
       if (timer) {
         clearTimeout(timer);
       }
@@ -65,10 +73,11 @@ module.exports = function (grunt) {
 
     }
 
-    // Set the timeout for the task, as it is async.
+    // Set the timeout for the task, as it is async, best to have one of these.
     timer = setTimeout(function() {
 
-      grunt.log.error('Tail: Failed. Timeout reached.');
+      grunt.verbose.error('Tail: Failed. Timeout reached.');
+
       complete(false);
 
     }, timeout);
@@ -80,7 +89,7 @@ module.exports = function (grunt) {
       found = fs.existsSync(options.fileName);
     }
 
-    grunt.log.writeln('Tail: File found, begin tail.');
+    grunt.verbose.writeln('Tail: File found, begin tail.');
 
     // Create the tail for our input file.
     var watchOptions = {};
@@ -92,21 +101,30 @@ module.exports = function (grunt) {
       // Check if the new line matched our desired output.
       if (data.match(regex)) {
 
-        grunt.log.writeln('Tail: Success. Match found, continuing to next task.');
+        // Tell grunt we are ok.
+        grunt.log.ok('Tail: Success. Match found, continuing to next task.');
+
         complete(true);
 
       }
 
     });
 
-    // Force the file to flush if it isn't.
+    // Force the file to flush if it hasn't.
     interval = setInterval(function () {
       var fd = fs.openSync(options.fileName, 'r');
       fs.closeSync(fd);
     }, 500);
 
-    // TODO: Triggers the watch so the read for the tail starts at the start of an exisiting file. Not great.
-    fs.appendFileSync(options.fileName, ' ');
+    if (options.forceWatchFromBeginning) {
+
+      grunt.verbose.writeln('Tail: Writting to file to force watcher.');
+
+      // TODO: Triggers the watch, so the read for the tail starts at the start of an exisiting file. Not great.
+      // This is needed if between the start of this task and the beginning of the next the watched file has
+      // already been finished with.
+      fs.appendFileSync(options.fileName, ' ');
+    }
 
   });
 
