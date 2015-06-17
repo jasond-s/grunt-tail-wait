@@ -56,6 +56,39 @@ module.exports = function(grunt) {
           forceWatchFromBeginning: true,
           fromBeginning: true
         }
+      },
+      initial_file_options: {
+        files: [{
+            expand: true,
+            cwd: './',
+            src: [
+              './**/*.someNonsense',
+            ],
+            dest: './',
+            ext: '.someNonsense'
+        }],
+        options : {
+          initialFile: path.join(__dirname + '/package.json'),
+          timeout: 10000,
+          regex: 'Dependencies',
+          forceWatchFromBeginning: true,
+          fromBeginning: true
+        }
+      },
+      search_file_options: {
+        files: [{
+            expand: true,
+            cwd: './',
+            src: [
+              './**/*.someNonsense',
+            ],
+            dest: './',
+            ext: '.someNonsense'
+        }],
+        options : {
+          timeout: 10000,
+          regex: 'Dependencies'
+        }
       }
     },
 

@@ -25,8 +25,6 @@ module.exports = function (grunt) {
 
     var files = data.fileName ? [data.fileName] : this.filesSrc;
 
-    console.log(files);
-
     // Populate some options and fail is required options are not present.
     var options = {
 
@@ -35,6 +33,7 @@ module.exports = function (grunt) {
       regex: data.regex,
 
       // Not required props, have defaults.
+      initialFile: data.initialFile || null,
       lineSeparator: data.lineSeparator || "\n",
       timeout: data.timeout || 30000,
       fromBeginning: data.fromBeginning || false,
@@ -53,6 +52,9 @@ module.exports = function (grunt) {
 
     // The timer used to cancel and move on if tail fails.
     var timer = null;
+
+    // The timer used for the searcher if no files found at startup.
+    var search = null;
 
     // An interval to read the file, forcing as OS flush.
     // Some loggers using a file streamers prevent the flush
@@ -77,7 +79,7 @@ module.exports = function (grunt) {
         // Stop watching the file.
         tails[i].unwatch();
 
-      };
+      }
 
       // Tell grunt that we have finished doing what we need to do.
       done(isSuccess);
@@ -93,64 +95,106 @@ module.exports = function (grunt) {
 
     }, timeout);
 
-    grunt.verbose.writeln('Tail: Search for files: ' + options.fileName);
 
+    // The processing function for a single file
 
-    // Works for multiple files so go and watch them all.
+    var process = function (innerFile) {
 
-    for (var i = options.fileName.length - 1; i >= 0; i--) {
+      grunt.verbose.writeln('Tail: Begin. ' + innerFile);
 
-      var file = options.fileName[i];
+      // Ensure the file exists or timeout reached before we continue.
+      var found = false;
 
-      (function (innerFile) {
+      while (!found) {
+        found = fs.existsSync(innerFile);
+      }
 
-        // Ensure the file exists or timeout reached before we continue.
-        var found = false;
+      grunt.verbose.writeln('Tail: File found, begin tail. ' + innerFile);
 
-        while (!found) {
-          found = fs.existsSync(innerFile);
+      // Create the tail for our input file.
+      var watchOptions = {};
+      var tail = new Tail(innerFile, options.lineSeparator, watchOptions, options.fromBeginning);
+
+      tails.push(tail);
+
+      // Check the contents of each line tailed.
+      tail.on("line", function (data) {
+
+        // Check if the new line matched our desired output.
+        if (data.match(regex)) {
+
+          // Tell grunt we are ok.
+          grunt.log.ok('Tail: Success. Match found, continuing to next task. ' + innerFile);
+
+          complete(true);
+
         }
 
-        grunt.verbose.writeln('Tail: File found, begin tail. ' + innerFile);
+      });
 
-        // Create the tail for our input file.
-        var watchOptions = {};
-        var tail = new Tail(innerFile, options.lineSeparator, watchOptions, options.fromBeginning);
+      // Force the file to flush if it hasn't.
+      intervals.push(setInterval(function () {
+        var fd = fs.openSync(innerFile, 'r');
+        fs.closeSync(fd);
+      }, 500));
 
-        tails.push(tail);
+      if (options.forceWatchFromBeginning) {
 
-        // Check the contents of each line tailed.
-        tail.on("line", function (data) {
+        grunt.verbose.writeln('Tail: Writting to file to force watcher. ' + innerFile);
 
-          // Check if the new line matched our desired output.
-          if (data.match(regex)) {
+        // TODO: Triggers the watch, so the read for the tail starts at the start of an exisiting file. Not great.
+        // This is needed if between the start of this task and the beginning of the next the watched file has
+        // already been finished with.
+        fs.appendFileSync(innerFile, String.fromCharCode(0x200B));
+      }
 
-            // Tell grunt we are ok.
-            grunt.log.ok('Tail: Success. Match found, continuing to next task. ' + innerFile);
+    };
 
-            complete(true);
 
-          }
+    // Process the whole queue of files.
+    var processQueue = function () {
 
-        });
+      // Works for multiple files so go and watch them all.
+      for (var i = options.fileName.length - 1; i >= 0; i--) {
 
-        // Force the file to flush if it hasn't.
-        intervals.push(setInterval(function () {
-          var fd = fs.openSync(innerFile, 'r');
-          fs.closeSync(fd);
-        }, 500));
+        process(options.fileName[i]);
 
-        if (options.forceWatchFromBeginning) {
+      }
+    };
 
-          grunt.verbose.writeln('Tail: Writting to file to force watcher. ' + innerFile);
+    // If the list of files discovered fall back to an initial file.
+    options.fileName = options.fileName.length
+      ? options.fileName
+      : options.initialFile
+        ? [options.initialFile]
+        : [];
 
-          // TODO: Triggers the watch, so the read for the tail starts at the start of an exisiting file. Not great.
-          // This is needed if between the start of this task and the beginning of the next the watched file has
-          // already been finished with.
-          fs.appendFileSync(innerFile, String.fromCharCode(0x200B));
+    // If no files have been initially discovered for pattern, then try to rematch.
+    if (options.fileName.length < 1 && this.data.files){
+
+      grunt.verbose.writeln('Tail: Search for files: ' + options.fileName);
+
+      search = setInterval(function () {
+
+        var newFiles = grunt.file.expand(data.files);
+
+        if (newFiles.length > 0 && search) {
+
+          // Clear the timeout now we have some files to tail.
+          clearTimeout(search);
+
+          search = null;
+
+          // Set the new files to tail.
+          options.fileName = grunt.file.expand(data.files);
+
+          processQueue();
         }
-      }(file));
+      }, 500);
+    } else {
+      processQueue();
     }
+
 
   });
 

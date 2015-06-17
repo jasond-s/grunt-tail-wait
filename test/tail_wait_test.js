@@ -30,14 +30,28 @@ exports.tail_wait = {
   single_file_options: function(test) {
     test.expect(1);
 
-    test.equal(2, 2, 'default behaviour reads the file packages file.');
+    test.equal(2, 2, 'default behaviour for the single file selector.');
 
     test.done();
   },
   multiple_file_options: function(test) {
     test.expect(1);
 
-    test.equal(1, 1, 'default behaviour reads the file packages file.');
+    test.equal(1, 1, 'default behaviour for the multiple file selector.');
+
+    test.done();
+  },
+  initial_file_options: function(test) {
+    test.expect(1);
+
+    test.equal(3, 3, 'default behaviour for the multiple file selector with initial file.');
+
+    test.done();
+  },
+  search_file_options: function(test) {
+    test.expect(1);
+
+    test.equal(4, 4, 'default behaviour for the multiple file selector when file not found yet.');
 
     test.done();
   },
