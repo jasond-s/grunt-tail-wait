@@ -32,19 +32,30 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     tail_wait: {
-      default_options: {
+      single_file_options: {
         timeout: 10000,
         fileName: path.join(__dirname + '/package.json'),
         regex: 'Dependencies',
         forceWatchFromBeginning: true,
         fromBeginning: true
       },
-      custom_options: {
-        timeout: 10000,
-        fileName: path.join(__dirname + '/package.json'),
-        regex: 'Dependencies',
-        forceWatchFromBeginning: true,
-        fromBeginning: true
+      multiple_file_options: {
+        files: [{
+            expand: true,
+            cwd: './',
+            src: [
+              './**/*.json',
+              '!./node_modules/**/*.json'
+            ],
+            dest: './',
+            ext: '.json'
+        }],
+        options : {
+          timeout: 10000,
+          regex: 'Test',
+          forceWatchFromBeginning: true,
+          fromBeginning: true
+        }
       }
     },
 

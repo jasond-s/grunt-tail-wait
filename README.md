@@ -39,6 +39,34 @@ grunt.initConfig({
 });
 ```
 
+Or if you want to wait for multiple files or need to use a grub string to select an unknown file path.
+
+```js
+grunt.initConfig({
+  tail_wait: {
+    namedOptions: {
+      files: [{
+        expand: true,
+        cwd: './',
+        src: ['./*.your.grub.string'],
+        dest: './',
+        ext: '.string'
+      }],
+      options: {
+        // fileName: 'path/to/your/file.log', // This is no longer required
+        regex: 'keyword',                     // Required, this is keyword/phrase you are waiting for.
+
+        timeout: 1              // defaults to 30 seconds,
+        lineSeparator: 'string' // defaults to '\n',
+
+        fromBeginning: false,           // defaults to false.
+        forceWatchFromBeginning: false, // defaults to false.
+      }
+    }
+  },
+});
+```
+
 
 1. `fromBeginning` - Specified whether from the first file change detected by the watcher you would like to read the file fro mthe beginning.
 2. `forceWatchFromBeginning` - Forces a file change by writting a Unicode U+0020 to the end of the file. This may be useful if the file you wish to watch may have already been finished writting to. Obviously, be aware this is, although minimally, changing the file.
@@ -61,6 +89,31 @@ grunt.initConfig({
 
       timeout: 10000 ,      // Wait for 10secs, set in ms.
       lineSeparator: "\r\n" // Use some exotic line endings for the tail.
+    }
+  },
+});
+```
+
+Or if the log file maybe has some generated string that is not known before start up. This is useful if you are using something like log4j or similar that might generate multiple files and rollover existing files during operation.
+
+
+```js
+grunt.initConfig({
+  tail_wait: {
+    dev:
+      files: [{
+        expand: true,
+        cwd: './',
+        src: ['./*.log.*'], // Where * represents an unknown string.
+        dest: './',
+        ext: '.log'
+      }],
+      options : {
+        regex: 'init complete',                             // Wait for the initialisation to complete.
+
+        timeout: 10000 ,      // Wait for 10secs, set in ms.
+        lineSeparator: "\r\n" // Use some exotic line endings for the tail.
+      }
     }
   },
 });

@@ -27,17 +27,17 @@ exports.tail_wait = {
     // setup here if necessary
     done();
   },
-  default_options: function(test) {
-    test.expect(1);
-
-    test.equal(1, 1, 'default behaviour reads the file packages file.');
-
-    test.done();
-  },
-  custom_options: function(test) {
+  single_file_options: function(test) {
     test.expect(1);
 
     test.equal(2, 2, 'default behaviour reads the file packages file.');
+
+    test.done();
+  },
+  multiple_file_options: function(test) {
+    test.expect(1);
+
+    test.equal(1, 1, 'default behaviour reads the file packages file.');
 
     test.done();
   },
