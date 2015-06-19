@@ -10,7 +10,9 @@
 
 // External dependencies.
 var Tail = require('tail').Tail;
+
 var fs = require('fs');
+
 
 // Export the gun task function for this module
 module.exports = function (grunt) {
@@ -34,14 +36,13 @@ module.exports = function (grunt) {
 
       // Not required props, have defaults.
       initialFile: data.initialFile || null,
-      lineSeparator: data.lineSeparator || "\n",
+      lineSeparator: data.lineSeparator || '\n',
       timeout: data.timeout || 30000,
       fromBeginning: data.fromBeginning || false,
 
       // This is only needed if the file watched has been
       // completed before the start of this task.
       forceWatchFromBeginning: data.forceWatchFromBeginning || false
-
     };
 
     // The regular expression we want to check for.
@@ -78,12 +79,10 @@ module.exports = function (grunt) {
 
         // Stop watching the file.
         tails[i].unwatch();
-
       }
 
       // Tell grunt that we have finished doing what we need to do.
       done(isSuccess);
-
     }
 
     // Set the timeout for the task, as it is async, best to have one of these.
@@ -127,17 +126,18 @@ module.exports = function (grunt) {
           grunt.log.ok('Tail: Success. Match found, continuing to next task. ' + innerFile);
 
           complete(true);
-
         }
-
       });
 
       // Force the file to flush if it hasn't.
       intervals.push(setInterval(function () {
+
         var fd = fs.openSync(innerFile, 'r');
+
         fs.closeSync(fd);
       }, 500));
 
+      // Force watching from the beginning of the file.
       if (options.forceWatchFromBeginning) {
 
         grunt.verbose.writeln('Tail: Writting to file to force watcher. ' + innerFile);
@@ -147,7 +147,6 @@ module.exports = function (grunt) {
         // already been finished with.
         fs.appendFileSync(innerFile, String.fromCharCode(0x200B));
       }
-
     };
 
 
@@ -158,9 +157,9 @@ module.exports = function (grunt) {
       for (var i = options.fileName.length - 1; i >= 0; i--) {
 
         process(options.fileName[i]);
-
       }
     };
+
 
     // If the list of files discovered fall back to an initial file.
     options.fileName = options.fileName.length
@@ -168,6 +167,7 @@ module.exports = function (grunt) {
       : options.initialFile
         ? [options.initialFile]
         : [];
+
 
     // If no files have been initially discovered for pattern, then try to rematch.
     if (options.fileName.length < 1 && this.data.files){
@@ -191,11 +191,10 @@ module.exports = function (grunt) {
           processQueue();
         }
       }, 500);
+
     } else {
+
       processQueue();
     }
-
-
   });
-
 };
