@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://tigerswithguitars/grunt-tail-wait"
+    "url": "https://github.com/jasond-s/grunt-tail-wait"
   },
   "bugs": {
     "url": ""
@@ -34,7 +34,7 @@
     "grunt": "~0.4.5"
   },
   "peerDependencies": {
-    "grunt": "~0.4.5"
+    "grunt": ">=0.4.5"
   },
   "keywords": [
     "gruntplugin"
