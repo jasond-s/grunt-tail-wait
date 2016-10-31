@@ -39,6 +39,7 @@ module.exports = function (grunt) {
       lineSeparator: data.lineSeparator || '\n',
       timeout: data.timeout || 30000,
       fromBeginning: data.fromBeginning || false,
+      printMatch: data.printMatch || false,
 
       // This is only needed if the file watched has been
       // completed before the start of this task.
@@ -124,6 +125,10 @@ module.exports = function (grunt) {
 
           // Tell grunt we are ok.
           grunt.log.ok('Tail: Success. Match found, continuing to next task. ' + innerFile);
+
+          if (options.printMatch) {
+              grunt.log.write(data);
+          }
 
           complete(true);
         }
